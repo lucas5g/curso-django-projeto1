@@ -57,7 +57,7 @@
       * {
         padding: 0;
         margin: 0;
-        box-sizing: 0;
+        box-sizing: border-box;
       }
       html {
         font-size: 62.5%;
@@ -142,6 +142,23 @@
       .search-button:focus-within .search-button{
         border-color: var(--color-primary);
       }
+
+      .main-content{
+        background: blue;
+        padding-top: 0;
+      }
+
+      .main-content-list{
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+        gap: var(--spacing-gutter-large)
+      }
+
+      .temp{
+        height: 40rem;
+        background: red;
+      }
+
     </style>
   </head>
   <body>
