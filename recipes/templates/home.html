@@ -1,17 +1,11 @@
-{% extends 'layout.html' %}
+{% extends 'components/layout.html' %}
 
 {% block content %}
-  {% include 'search.html' %}
+  {% include 'components/search.html' %}
   <main class="main-content-container">
     <div class="main-content main-content-list container">
-      <div class="recipe recipe-list-item">
-        <div class="recipe-cover">
-          <img src="https://placehold.co/1280x720" alt="recipe" />
-        </div>
-        <div class="recipe-title-container">
-          <h2 class="recipe-list">Lorem ipsum dolor sit.</h2>
-        </div>
-      </div>
+      {% include 'components/recipe.html' %}
+      {% include 'components/recipe.html' %}
     </div>
   </main>
 {% endblock %}
