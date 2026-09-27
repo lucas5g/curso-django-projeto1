@@ -1,3 +1,3 @@
 # curso-django-projeto1
 
-escutar 27
+escutar 28
