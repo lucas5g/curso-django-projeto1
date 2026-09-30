@@ -13,8 +13,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@100..900&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="{% static 'styles.css' %}">
-  <title>Recipes</title>
+  <link rel="stylesheet" href="{% static 'styles.css' %}?version=2026.09.29">
+  <title>{% block title%}{% endblock %} | Recipes</title>
   <style>
    
   </style>
@@ -31,9 +31,11 @@
       </h1>
     </div>
   </header>
-  {% block content %}
-
-  {% endblock %}
+  <main class="main-content-container">
+    {% block content %}
+    
+    {% endblock %}
+  </main>
   <footer class='main-footer'>
     <div class="developer">
       <a href="">By Otávio Miranda</a>
