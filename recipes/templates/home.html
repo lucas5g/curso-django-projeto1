@@ -1,10 +1,13 @@
 {% extends 'components/layout.html' %}
 
-{% block title %}Home{% endblock title %}
+{% block title %}
+  Home
+{% endblock %}
 {% block content %}
   {% include 'components/search.html' %}
   <div class="main-content main-content-list container">
-    {% include 'components/recipe.html' %}
-    {% include 'components/recipe.html' %}
+    {% for recipe in recipes %}
+      {% include 'components/recipe.html' %}
+    {% endfor %}
   </div>
 {% endblock %}
