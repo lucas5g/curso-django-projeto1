@@ -1,0 +1,12 @@
+{
+  "files.associations": {
+    "**/templates/**/*.html": "django-html"
+  },
+  "djlint.useVenv": false,
+  "djlint.executablePath": "/home/lucas/.local/share/virtualenvs/curso-django-projeto1-XS4s3uCS/bin/djlint",
+  "[django-html]": {
+    "editor.defaultFormatter": "monosans.djlint",
+    "editor.formatOnSave": true,
+    "editor.tabSize": 2
+  }
+}

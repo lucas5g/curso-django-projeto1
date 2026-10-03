@@ -10,6 +10,7 @@ pillow = "*"
 
 [dev-packages]
 django-browser-reload = "*"
+djlint = "*"
 
 [requires]
 python_version = "3.14"
