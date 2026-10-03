@@ -6,6 +6,7 @@ name = "pypi"
 [packages]
 django = "*"
 faker = "*"
+pillow = "*"
 
 [dev-packages]
 django-browser-reload = "*"
