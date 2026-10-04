@@ -29,7 +29,7 @@ def category(request, category_id):
     return render(
         request,
         "category.html",
-        context={"recipes": recipes, "title": f"{recipes.first.category.name}"},
+        context={"recipes": recipes, "title": f"{recipes.first().category.name}"},
     )
 
 
