@@ -1,0 +1,15 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Django: runserver 8887 (debug)",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/manage.py",
+      "args": ["runserver", "8887", "--noreload"],
+      "python": "/home/lucas/.local/share/virtualenvs/curso-django-projeto1-XS4s3uCS/bin/python",
+      "django": true,
+      "justMyCode": true
+    }
+  ]
+}
