@@ -8,5 +8,9 @@
     "editor.defaultFormatter": "monosans.djlint",
     "editor.formatOnSave": true,
     "editor.tabSize": 2
-  }
+  },
+  "python.defaultInterpreterPath": "/home/lucas/.local/share/virtualenvs/curso-django-projeto1-XS4s3uCS/bin/python",
+  "python.testing.pytestArgs": ["."],
+  "python.testing.pytestEnabled": true,
+  "python.testing.unittestEnabled": false
 }

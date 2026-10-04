@@ -7,10 +7,13 @@ name = "pypi"
 django = "*"
 faker = "*"
 pillow = "*"
+pytest = "*"
+pytest-django = "*"
 
 [dev-packages]
 django-browser-reload = "*"
 djlint = "*"
+pytest-watcher = "*"
 
 [requires]
 python_version = "3.14"
