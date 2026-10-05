@@ -1,15 +1,14 @@
-from django.shortcuts import get_object_or_404, get_list_or_404, render
+from django.shortcuts import get_object_or_404, render
 from django.http import Http404
 from .models import Recipe
 
 
 # Create your views here.
 def home(request):
-    recipes = get_list_or_404(
-        Recipe.objects.filter(
-            is_published=True,
-        ).order_by("-id")
-    )
+    # Sem 404 aqui: o template já trata lista vazia com {% empty %}
+    recipes = Recipe.objects.filter(
+        is_published=True,
+    ).order_by("-id")
     return render(request, "home.html", context={"recipes": recipes})
 
 
