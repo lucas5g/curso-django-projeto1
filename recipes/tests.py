@@ -3,6 +3,7 @@ from django.urls import reverse, resolve
 from recipes import views
 from recipes.models import Category, Recipe, User
 from unittest import skip 
+from django.core.exceptions import ValidationError 
 
 # Create your tests here.
 class RecipeURLsTest(TestCase):
@@ -118,3 +119,53 @@ class RecipeViewsTest(TestCase):
             'No recipes found here',
             response.content.decode('utf-8')
         )
+
+class RecipeModelTest(TestCase):
+    def setUp(self):
+        category = Category.objects.create(name="Category")
+        author = User.objects.create_user(
+            first_name="user",
+            last_name="name",
+            username="username",
+            password="123456",
+            email="username@mail.com"
+        )
+
+        recipe = Recipe.objects.create(
+            category=category,
+            author=author,
+            title="Recipe Title",
+            description="Recipe Description",
+            slug="recipe-title",
+            preparation_time=10,
+            preparation_time_unit="minutes",
+            servings=5,
+            servings_unit="portions",
+            preparation_steps="Recipe Preparation Steps",
+            is_published=True,
+        )
+
+    def test_recipe_title_raise_error_if_title_has_more_then_65_chars(self):
+        recipe = Recipe.objects.filter(pk=1).first()
+        recipe.title = 'A' * 70 
+
+        with self.assertRaises(ValidationError):
+            recipe.full_clean()  # save() não valida; full_clean() checa max_length
+
+    
+    def test_recipe_fields_max_lenght(self):
+        fields = [
+            ('title', 65),
+            ('description', 165),
+            ('preparation_time_unit', 65),
+            ('servings_unit', 65),
+            ('slug', 65),
+        ]
+
+        for field, max_lenght in fields:
+            # subTest mostra qual campo falhou, sem parar no primeiro
+            with self.subTest(field=field, max_lenght=max_lenght):
+                recipe = Recipe.objects.filter(pk=1).first()
+                setattr(recipe, field, 'A' * (max_lenght + 1))
+                with self.assertRaises(ValidationError):
+                    recipe.full_clean()
