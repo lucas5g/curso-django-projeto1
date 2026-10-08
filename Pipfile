@@ -9,6 +9,7 @@ faker = "*"
 pillow = "*"
 pytest = "*"
 pytest-django = "*"
+coverage = "*"
 
 [dev-packages]
 django-browser-reload = "*"

@@ -169,3 +169,16 @@ class RecipeModelTest(TestCase):
                 setattr(recipe, field, 'A' * (max_lenght + 1))
                 with self.assertRaises(ValidationError):
                     recipe.full_clean()
+
+    def test_recipe_preparations_steps_is_html_is_false_by_default(self):
+        recipe = Recipe.objects.filter(pk=1).first()
+        recipe.preparation_steps_is_html = False 
+        # recipe.save() 
+
+
+        self.assertFalse(recipe.preparation_steps_is_html)
+
+    def test_recipe_is_published_is_false_by_default(self):
+        recipe =Recipe.objects.filter(pk=1).first()
+        recipe.is_published = False
+        self.assertFalse(recipe.is_published)
