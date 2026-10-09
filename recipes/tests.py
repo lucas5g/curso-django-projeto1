@@ -2,8 +2,8 @@ from django.test import TestCase
 from django.urls import reverse, resolve
 from recipes import views
 from recipes.models import Category, Recipe, User
-from unittest import skip 
-from django.core.exceptions import ValidationError 
+from unittest import skip
+from django.core.exceptions import ValidationError
 
 # Create your tests here.
 class RecipeURLsTest(TestCase):
@@ -13,7 +13,6 @@ class RecipeURLsTest(TestCase):
         url = reverse('recipes:home')
         self.assertEqual(url, '/')
 
-
     def test_recipe_category_url_is_correct(self):
         url = reverse('recipes:category', kwargs={'category_id': 1})
         self.assertEqual(url, '/recipes/category/1/')
@@ -21,6 +20,10 @@ class RecipeURLsTest(TestCase):
     def test_recipe_details_url_is_correct(self):
         url = reverse('recipes:recipe', kwargs={'id': 1})
         self.assertEqual(url, '/recipes/1')
+
+    def test_recipe_search_url_is_correct(self):
+        url = reverse('recipes:search')
+        self.assertEqual(url, '/recipes/search/')
 
 class RecipeViewsTest(TestCase):
 
@@ -107,7 +110,7 @@ class RecipeViewsTest(TestCase):
         self.assertEqual(len(response_context), 1)
 
 
-    def test_recip_home_template_dont_load_recipes_not_published(self):
+    def test_recipe_home_template_dont_load_recipes_not_published(self):
 
         recipe = Recipe.objects.get(pk=1)
         recipe.is_published = False
@@ -119,6 +122,16 @@ class RecipeViewsTest(TestCase):
             'No recipes found here',
             response.content.decode('utf-8')
         )
+
+    def test_recipe_search_loads_correct_template(self):
+        response = self.client.get(reverse('recipes:search') + '?q=teste')
+
+        self.assertTemplateUsed(response, 'search.html')
+
+
+    def test_recipe_search_raises_404_if_no_search_term(self):
+        response = self.client.get(reverse("recipes:search"))
+        self.assertEqual(response.status_code, 404)
 
 class RecipeModelTest(TestCase):
     def setUp(self):
@@ -147,12 +160,12 @@ class RecipeModelTest(TestCase):
 
     def test_recipe_title_raise_error_if_title_has_more_then_65_chars(self):
         recipe = Recipe.objects.filter(pk=1).first()
-        recipe.title = 'A' * 70 
+        recipe.title = 'A' * 70
 
         with self.assertRaises(ValidationError):
             recipe.full_clean()  # save() não valida; full_clean() checa max_length
 
-    
+
     def test_recipe_fields_max_lenght(self):
         fields = [
             ('title', 65),
@@ -172,8 +185,8 @@ class RecipeModelTest(TestCase):
 
     def test_recipe_preparations_steps_is_html_is_false_by_default(self):
         recipe = Recipe.objects.filter(pk=1).first()
-        recipe.preparation_steps_is_html = False 
-        # recipe.save() 
+        recipe.preparation_steps_is_html = False
+        # recipe.save()
 
 
         self.assertFalse(recipe.preparation_steps_is_html)

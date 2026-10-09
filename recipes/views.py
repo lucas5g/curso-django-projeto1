@@ -41,3 +41,21 @@ def recipe(request, id):
     return render(
         request, "recipe.html", context={"recipe": recipe, "is_detail_page": True}
     )
+
+def search(request):
+
+    term = request.GET.get('q', '').strip()
+
+    if not term:
+        raise Http404()
+    
+    recipes = Recipe.objects.filter(
+        is_published=True,
+        title__icontains=term,
+    ).order_by('-id')
+
+    return render(
+        request,
+        'search.html',
+        context={'recipes': recipes, 'term': term}
+    )
