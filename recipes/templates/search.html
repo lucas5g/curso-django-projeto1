@@ -1,10 +1,19 @@
-<div class="search-container">
-  <div class="container">
-    <form action="{% url 'recipes:search' %}">
-      <input type="search" class="search-input" name="q">
-      <button type="submit" class="search-button">
-        <i class="fas fa-search"></i>
-      </button>
-    </form>
-  </div>
-</div>
+{% extends "components/layout.html" %}
+{% block title %}
+  {{ page_title }}
+{% endblock %}
+{% block content %}
+    {% include "components/search.html" %}
+    <div class="center">
+        <h2>O usuário pesquisou por {{ search_term }}</h2>
+    </div>
+    <div class="main-content main-content-list container">
+        {% for recipe in recipes %}
+            {% include "components/recipe.html" %}
+        {% empty %}
+            <div class="center m-y">
+                <h1>No recipes found here</h1>
+            </div>
+        {% endfor %}
+    </div>
+{% endblock %}
