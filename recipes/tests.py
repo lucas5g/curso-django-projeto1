@@ -133,6 +133,14 @@ class RecipeViewsTest(TestCase):
         response = self.client.get(reverse("recipes:search"))
         self.assertEqual(response.status_code, 404)
 
+    def test_recipe_search_term_is_on_page_title_and_escaped(self):
+        url = reverse('recipes:search') + '?q=Teste'
+        response = self.client.get(url)
+
+        self.assertIn(
+            'Search for &quot;Teste&quot;',
+            response.content.decode("utf-8")
+        )
 class RecipeModelTest(TestCase):
     def setUp(self):
         category = Category.objects.create(name="Category")
