@@ -2,7 +2,9 @@ from django.http import Http404
 from django.shortcuts import get_object_or_404, render
 from django.db.models import Q
 from .models import Recipe
-
+from utils.pagination import make_pagination
+import os
+PER_PAGE = os.environ.get('PER_PAGE', 6)
 
 # Create your views here.
 def home(request):
@@ -10,14 +12,18 @@ def home(request):
     recipes = Recipe.objects.filter(
         is_published=True,
     ).order_by("-id")
-    return render(request, "home.html", context={"recipes": recipes})
+
+    page_obj, pagination_range = make_pagination(request, recipes, PER_PAGE)
+
+    return render(request, "home.html", context={
+        "recipes": page_obj,
+        "pagination_range": pagination_range,
+    })
+
 
 
 def category(request, category_id):
-    # recipes = get_list_or_404(Recipe.objects.filter(
-    #     category__id=category_id,
-    #     is_published=True,
-    # ).order_by('-id'))
+    
     recipes = Recipe.objects.filter(
         category__id=category_id,
         is_published=True,
@@ -26,11 +32,14 @@ def category(request, category_id):
     if not recipes:
         raise Http404()
 
-    return render(
-        request,
-        "category.html",
-        context={"recipes": recipes, "title": f"{recipes.first().category.name}"},
-    )
+    page_obj, pagination_range = make_pagination(request, recipes, PER_PAGE)
+
+
+    return render(request, "category.html", context={
+        "recipes": page_obj, 
+        "title": f"{recipes.first().category.name}",
+        "pagination_range":pagination_range,
+    })
 
 
 def recipe(request, id):
@@ -57,12 +66,17 @@ def search(request):
         is_published=True,
     ).order_by("-id")
 
+    page_obj, pagination_range = make_pagination(request, recipes, PER_PAGE)
+
+
     return render(
         request,
         "search.html",
         context={
             "page_title":f'Search for "{search_term}"',
             "search_term": search_term,
-            "recipes": recipes,
+            "recipes": page_obj,
+            "pagination_range": pagination_range,
+            "additional_url_query": f"&q={search_term}",
         },
     )
