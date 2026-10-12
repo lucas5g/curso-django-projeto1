@@ -4,6 +4,7 @@ from recipes import views
 from recipes.models import Category, Recipe, User
 from unittest import skip
 from django.core.exceptions import ValidationError
+from unittest.mock import patch
 
 # Create your tests here.
 class RecipeURLsTest(TestCase):
@@ -176,6 +177,32 @@ class RecipeViewsTest(TestCase):
         self.assertIn(recipe1, response_both.context['recipes'])
         self.assertIn(recipe2, response_both.context['recipes'])
 
+    def test_recipe_home_is_paginated(self):
+        for i in range(8):
+            recipe = Recipe.objects.create(
+                category=Recipe.objects.get(pk=1).category,
+                author=Recipe.objects.get(pk=1).author,
+                title=f'Recipe {i}',
+                description='Recipe Description',
+                slug=f'recipe-{i}',
+                preparation_time=10,
+                preparation_time_unit='minutes',
+                servings=5,
+                servings_unit='portions',
+                preparation_steps='Recipe Preparation Steps',
+                is_published=True,
+            )
+            recipe.save()
+
+        with patch('recipes.views.PER_PAGE', new=3):
+            response = self.client.get(reverse('recipes:home'))
+            recipes = response.context['recipes']
+            paginator = recipes.paginator
+            self.assertEqual(paginator.num_pages, 3)
+
+            self.assertEqual(len(paginator.get_page(1)), 3)
+            self.assertEqual(len(paginator.get_page(2)), 3)
+            self.assertEqual(len(paginator.get_page(3)), 3)
 
 
 class RecipeModelTest(TestCase):

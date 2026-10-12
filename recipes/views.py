@@ -1,9 +1,12 @@
+import os
 from django.http import Http404
 from django.shortcuts import get_object_or_404, render
 from django.db.models import Q
 from .models import Recipe
 from utils.pagination import make_pagination
-import os
+from django.contrib import messages
+
+
 PER_PAGE = os.environ.get('PER_PAGE', 6)
 
 # Create your views here.
@@ -14,6 +17,9 @@ def home(request):
     ).order_by("-id")
 
     page_obj, pagination_range = make_pagination(request, recipes, PER_PAGE)
+    messages.success(request, 'que legal, foi um sucess!')
+    messages.error(request, 'erro')
+    messages.info(request, 'informação')
 
     return render(request, "home.html", context={
         "recipes": page_obj,
