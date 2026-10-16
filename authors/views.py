@@ -1,9 +1,19 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from .forms import RegisterForm
 
 # Create your views here.
 def register_view(request):
-    form = RegisterForm()
+    register_form_data = request.session.get('register_form_data', None)
+    form = RegisterForm(register_form_data)
     return render(request, 'register.html', {
         'form': form
     })
+
+def register_create(request):
+    if not request.POST:
+        raise Http404
+    
+    request.session['register_form_data'] = request.POST
+    form = RegisterForm(request.POST)
+
+    return redirect('authors:register')
