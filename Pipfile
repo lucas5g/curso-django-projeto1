@@ -11,6 +11,7 @@ pytest = "*"
 pytest-django = "*"
 coverage = "*"
 python-dotenv = "*"
+parameterized = "*"
 
 [dev-packages]
 django-browser-reload = "*"

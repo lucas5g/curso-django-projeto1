@@ -1,9 +1,34 @@
+import re
 from django import forms
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 
+def strong_password(password):
+    regex = re.compile(r'(?=.*[a-z])(?=.*\d)(?=.*[A-Z])(?=.*\Z).{8,}$')
+
+    if not regex.match(password):
+        raise ValidationError((
+            'Password must have at least one uppercase letter,'
+            'one lowercase letter and one number. The length should be'
+            'at least 8 characters.',
+        ),
+            code='Invalid'
+        )
 
 class RegisterForm(forms.ModelForm):
+    password = forms.CharField(
+        required=True,
+        validators=[strong_password],
+        help_text=(
+            'Use at least 8 characters, including an uppercase letter, '
+            'a lowercase letter, and a number.'
+        ),
+        widget=forms.PasswordInput(attrs={
+            'placeholder': 'Type your Password here',
+        }),
+        label='Password'
+    )
+
     password2 = forms.CharField(
         required=True,
         widget=forms.PasswordInput(attrs={
@@ -25,8 +50,7 @@ class RegisterForm(forms.ModelForm):
             'username': 'Username',
             'first_name': 'First Name',
             'last_name': 'Last Name',
-            'email': 'Email',
-            'password': 'Password',
+            'email': 'E-mail',
         }
 
         help_texts = {
@@ -45,30 +69,7 @@ class RegisterForm(forms.ModelForm):
                 'placeholder': 'Type your FirstName here',
                 'class': 'input text-input outra'
             }),
-            'password': forms.PasswordInput(attrs={
-                'placeholder': 'Type your Password here',
-            })
         }
-
-    def clean_password(self):
-        data = self.cleaned_data.get('password')
-
-        if '123' in data:
-            raise ValidationError(
-                'Não digite "123" no campo password.',
-                code='invalid_password'
-            )
-        return data
-
-    def clean_first_name(self):
-        data = self.cleaned_data.get('first_name')
-
-        if 'teste' in data:
-            raise ValidationError(
-                'Não digite %(values)s no campo first name',
-                code='invalid',
-                params={'values': data}
-            )
 
     def clean(self):
         clean_data = super().clean()
@@ -88,3 +89,5 @@ class RegisterForm(forms.ModelForm):
                 'password2': password_confirmation_error,
 
             })
+
+        # return
