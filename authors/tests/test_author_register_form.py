@@ -65,7 +65,8 @@ class AuthorRegisterFormTestCase(DjangoTestCase):
         }
 
     @parameterized.expand([
-        ('username', 'Este campo é obrigatório')
+        ('username', 'Este campo é obrigatório'),
+        ('first_name', 'Este campo é obrigatório'),
     ])
     def test_fields_cannot_be_empty(self, field, msg):
         self.form_data[field] = ''
