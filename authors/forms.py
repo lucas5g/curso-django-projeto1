@@ -26,17 +26,25 @@ class RegisterForm(forms.ModelForm):
         widget=forms.PasswordInput(attrs={
             'placeholder': 'Type your Password here',
         }),
-        label='Password'
+        label='Password',
+        error_messages={
+            'required':'Password must not be empty'
+        }
     )
 
     password2 = forms.CharField(
         required=True,
         widget=forms.PasswordInput(attrs={
             'placeholder': 'Repeat your password',
-        })
+        }),
+        label='Password Confirmation',
+        error_messages={
+            'required':'Please, repeat your password'
+        }
     )
 
     class Meta:
+
         model = User
         fields = [
             'first_name',
@@ -59,9 +67,19 @@ class RegisterForm(forms.ModelForm):
 
         error_messages = {
             'username': {
-                'required': 'This field must not be empty.',
+                'required': 'This field must not be empty',
                 'invalid': 'This field is invalid.'
+            },
+            'first_name':{
+                'required':'Write your first name'
+            },
+            'last_name':{
+                "required": "Write your last name"
+            },
+            'email': {
+                'required': 'Email is required'
             }
+            
         }
 
         widgets = {
@@ -70,6 +88,12 @@ class RegisterForm(forms.ModelForm):
                 'class': 'input text-input outra'
             }),
         }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['first_name'].required = True
+        self.fields['last_name'].required = True
+        self.fields['email'].required = True
 
     def clean(self):
         clean_data = super().clean()
