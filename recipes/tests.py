@@ -204,6 +204,8 @@ class RecipeViewsTest(TestCase):
             self.assertEqual(len(paginator.get_page(2)), 3)
             self.assertEqual(len(paginator.get_page(3)), 3)
 
+    # def test_make_pagination_uses_page_
+
 
 class RecipeModelTest(TestCase):
     def setUp(self):

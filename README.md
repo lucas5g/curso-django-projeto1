@@ -7,3 +7,6 @@ https://pypi.org/project/django-browser-reload/
 
  openssl rand -hex 32
  openssl rand -base64 24
+
+coverage run --source='.' -m pytest
+coverage html

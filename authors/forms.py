@@ -7,15 +7,30 @@ def strong_password(password):
     regex = re.compile(r'(?=.*[a-z])(?=.*\d)(?=.*[A-Z])(?=.*\Z).{8,}$')
 
     if not regex.match(password):
-        raise ValidationError((
-            'Password must have at least one uppercase letter,'
-            'one lowercase letter and one number. The length should be'
+        raise ValidationError(
+            'Password must have at least one uppercase letter, '
+            'one lowercase letter and one number. The length should be '
             'at least 8 characters.',
-        ),
             code='Invalid'
         )
+        
 
 class RegisterForm(forms.ModelForm):
+
+    username = forms.CharField(
+        help_text=(
+            'Username must have letters, numbers or one of those @.+-_.'
+            'The lenght should be between 4 and 150 characters.'
+        ),
+        error_messages={
+            'required': 'This field must not be empty',
+            'min_length': 'Username must have at least 4 characters',
+            'max_length': 'Username must have less than 150 characters'
+        },
+        min_length=4,
+        max_length=150,
+    )
+
     password = forms.CharField(
         required=True,
         validators=[strong_password],
@@ -43,6 +58,9 @@ class RegisterForm(forms.ModelForm):
         }
     )
 
+   
+
+
     class Meta:
 
         model = User
@@ -55,21 +73,21 @@ class RegisterForm(forms.ModelForm):
         ]
 
         labels = {
-            'username': 'Username',
+            # 'username': 'Username',
             'first_name': 'First Name',
             'last_name': 'Last Name',
             'email': 'E-mail',
         }
 
         help_texts = {
-            'email': 'The e-mail must be valid.'
+            'email': 'The e-mail must be valid.',
+            'username': (
+                'Username must have letters, numbers or one of those @.+-_.'
+                'The lenght should be between 4 and 150 characters.'
+            )
         }
 
-        error_messages = {
-            'username': {
-                'required': 'This field must not be empty',
-                'invalid': 'This field is invalid.'
-            },
+        error_messages = {          
             'first_name':{
                 'required':'Write your first name'
             },
@@ -104,7 +122,7 @@ class RegisterForm(forms.ModelForm):
         if password != password2:
 
             password_confirmation_error = ValidationError(
-                'Password and password2 must be the equal',
+                'Password and password2 must be equal',
                 code='invalid'
             )
 
