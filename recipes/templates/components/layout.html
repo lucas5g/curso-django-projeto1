@@ -1,50 +1,48 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
-
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.3.1/css/all.min.css"
-    integrity="sha512-QeR2VH+lsBE5LSAe1Q5EnTBbe7XTBubt8dG93Y7gidSgdMCr8nVqKcfKAMyN96SV8KDbZVTDXChatu5G2KQGzg=="
-    crossorigin="anonymous" referrerpolicy="no-referrer" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.3.1/css/brands.min.css" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.3.1/css/solid.min.css" />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@100..900&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="{% static 'styles.css' %}?version=2026.10.20">
-  <title>{% block title%}{% endblock %} | Recipes</title>
-  <style>
-   
-  </style>
-</head>
-
-<body>
-  <header class="main-header-container">
-    <div class="main-header container">
-      <h1>
-        <a class="main-logo" href="{% url 'recipes:home' %}">
-          <i class="fas fa-utensils main-logo-icon"></i>
-          <span class="main-logo-text">Recipes</span>
-        </a>
-      </h1>
-    </div>
-  </header>
-  <main class="main-content-container">
-    {% block content %}
-    
-    {% endblock %}
-    {% include 'components/pagination.html' %}
-  </main>
-  <footer class='main-footer'>
-    <div class="developer">
-      <a href="">By Otávio Miranda</a>
-    </div>
-    <div class="powered">
-      <a href="">Powered by Django</a>
-    </div>
-  </footer>
-</body>
-
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.3.1/css/all.min.css"
+          integrity="sha512-QeR2VH+lsBE5LSAe1Q5EnTBbe7XTBubt8dG93Y7gidSgdMCr8nVqKcfKAMyN96SV8KDbZVTDXChatu5G2KQGzg=="
+          crossorigin="anonymous"
+          referrerpolicy="no-referrer" />
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.3.1/css/brands.min.css" />
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.3.1/css/solid.min.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@100..900&display=swap"
+          rel="stylesheet" />
+    <link rel="stylesheet" href="{% static 'styles.css' %}?version=2026.10.21">
+    <title>{% block title %}{% endblock %} | Recipes</title>
+    <style></style>
+  </head>
+  <body>
+    <header class="main-header-container">
+      <div class="main-header container">
+        <h1>
+          <a class="main-logo" href="{% url 'recipes:home' %}">
+            <i class="fas fa-utensils main-logo-icon"></i>
+            <span class="main-logo-text">Recipes</span>
+          </a>
+        </h1>
+      </div>
+    </header>
+    <main class="main-content-container">
+      {% block content %}{% endblock %}
+      {% include "components/pagination.html" %}
+    </main>
+    <footer class="main-footer">
+      <div class="developer">
+        <a href="">By Otávio Miranda</a>
+      </div>
+      <div class="powered">
+        <a href="">Powered by Django</a>
+      </div>
+    </footer>
+  </body>
 </html>
