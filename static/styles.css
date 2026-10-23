@@ -401,3 +401,17 @@ h6 {
 .form-content button:hover {
     background: var(--color-primary-hover);
 }
+
+.inline-form{
+    display: inline;
+    font-size: 1.6rem;
+}
+
+.plaintext-button{
+    display: inline;
+    border: none;
+    background: none;
+    cursor: pointer;
+    color: var(--color-primary);
+    font-size: 1.6rem;
+}
