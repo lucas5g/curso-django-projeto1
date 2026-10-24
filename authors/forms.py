@@ -169,5 +169,18 @@ class AuthorRecipeForm(forms.ModelForm):
             ),
             "cover": forms.ClearableFileInput(
                 attrs={"class":"span-2"}
-            )
+            ),
+            "servings_unit": forms.Select(
+                choices=(
+                    ['Pessoas', 'Pessoas'],
+                    ['Porções', 'Porções'],
+                    ['Pedaços', 'Pedaços'],
+                )
+            ),
+            "preparation_time_unit": forms.Select(
+                choices=(
+                    ['Minutos', 'Minutos'],
+                    ['Horas', 'Horas'],
+                )
+            ),
         }
