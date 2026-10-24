@@ -65,17 +65,25 @@ def login_create(request):
 
     messages.success(request, "Your are logged in")
     login(request, authenticated_user)
-    return redirect(login_url)
+    return redirect('authors:dashboard')
 
 
 @login_required(login_url="authors:login", redirect_field_name="next")
 def logout_view(request):
 
     if not request.POST:
-        raise Http404()
-
-    if request.POST.get("username") != request.user.username:
+        messages.error(request, "Invalid logout request")
         return redirect("authors:login")
 
+    if request.POST.get("username") != request.user.username:
+        messages.error(request, "Invalid logout user")
+        return redirect("authors:login")
+
+    messages.success(request, "Logged out successfully")
     logout(request)
     return redirect("authors:login")
+
+@login_required(login_url='authors:login', redirect_field_name="next")
+def dashboard(request):
+    return render(request, 'dashboard.html')
+
