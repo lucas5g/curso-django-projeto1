@@ -1,11 +1,11 @@
 from django.shortcuts import render, redirect
 from django.contrib import messages
-from .forms import RegisterForm, LoginForm
+from .forms import RegisterForm, LoginForm, AuthorRecipeForm
 from django.http import Http404, HttpResponseNotAllowed, HttpResponseBadRequest
 from django.urls import reverse
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
-
+from recipes.models import Recipe
 
 # Create your views here.
 def register_view(request):
@@ -65,7 +65,7 @@ def login_create(request):
 
     messages.success(request, "Your are logged in")
     login(request, authenticated_user)
-    return redirect('authors:dashboard')
+    return redirect("authors:dashboard")
 
 
 @login_required(login_url="authors:login", redirect_field_name="next")
@@ -83,7 +83,25 @@ def logout_view(request):
     logout(request)
     return redirect("authors:login")
 
-@login_required(login_url='authors:login', redirect_field_name="next")
-def dashboard(request):
-    return render(request, 'dashboard.html')
 
+@login_required(login_url="authors:login", redirect_field_name="next")
+def dashboard(request):
+    recipes = Recipe.objects.filter(is_published=False, author=request.user)
+    return render(request, "dashboard.html", context={"recipes": recipes})
+
+
+@login_required(login_url="authors:login", redirect_field_name="next")
+def dashboard_recipe_edit(request, id):
+    recipe = Recipe.objects.get(
+        is_published=False,
+        author=request.user,
+        pk=id,
+    )
+
+    return render(request, "dashboard_recipe.html", context={
+        "recipe": recipe,
+        "form": AuthorRecipeForm(
+            data=request.POST or None,
+            instance=recipe
+        )
+    })

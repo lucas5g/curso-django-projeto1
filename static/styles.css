@@ -361,6 +361,8 @@ h6 {
     color: var(--color-error-dark);
 }
 
+.form select,
+.form-content textarea,
 .form-content input {
     display: block;
     width: 100%;
@@ -385,6 +387,14 @@ h6 {
 
 .center {
     text-align: center;
+}
+
+.left{
+    text-align: left;
+}
+
+.span-2{
+    grid-column: span 2;
 }
 
 .form-content button {
@@ -414,4 +424,23 @@ h6 {
     cursor: pointer;
     color: var(--color-primary);
     font-size: 1.6rem;
+}
+
+
+.login-message{
+    margin: 1rem 0;
+}
+
+.authors-dashboard-container{
+    max-width: 64rem;
+    text-align: left;
+    padding: var(--spacing-gutter-medium);
+    margin: 0 auto;
+}
+
+.authors-dashboard-container h3,
+.authors-dashboard-container p,
+.authors-dashboard-container ul{
+    list-style-type: none;
+    margin: 1rem 0;
 }
