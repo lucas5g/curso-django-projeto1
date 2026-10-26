@@ -4,12 +4,19 @@
     <div class="main-content center container">
         <h2>Dashboard ({{ user }})</h2>
         {% include "components/login_message.html" %}
+        {% include "components/message.html" %}
         <div class="authors-dashboard-container">
             <h3>Your recipes</h3>
             <ul>
                 {% for recipe in recipes %}
                     <li>
-                        <a href="{% url "authors:dashboard_recipe_edit" recipe.id %}">{{ recipe.title }}</a>
+                        <a href="{% url "authors:dashboard_recipe_edit" recipe.id %}">{{ recipe.title }}</a> -
+                        <form class="inline-form"
+                              action="{% url 'authors:dashboard_recipe_delete' recipe.id %}"
+                              method="post">
+                            {% csrf_token %}
+                            <button class="plaintext-button" type="submit">Deletar</button>
+                        </form>
                     </li>
                 {% empty %}
                     <li>
@@ -19,5 +26,18 @@
             </ul>
         </div>
     </div>
-    {% include "components/message.html" %}
+    <script>
+        const forms =  document.querySelectorAll('form')
+        for(const form of forms){
+            form.addEventListener('submit', (event) => {
+                event.preventDefault()
+
+                const confirmed = confirm('Ara you sure?')
+
+                if(confirmed){
+                    form.submit()
+                }
+            })
+        }
+    </script>
 {% endblock content %}

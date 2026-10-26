@@ -46,11 +46,10 @@ def category(request, category_id):
 
 
 def recipe(request, id):
-    # Recipe.objects.filter(
-    #     pk=id,
-    #     is_published=True,
-    # ).order_by('-id').first()
-    recipe = get_object_or_404(Recipe, pk=id, is_published=True)
+    recipe = Recipe.objects.get(
+        pk=id,
+        is_published=True,
+    )
     return render(
         request, "recipe.html", context={"recipe": recipe, "is_detail_page": True}
     )

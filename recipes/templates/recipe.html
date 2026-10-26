@@ -2,5 +2,7 @@
 {% block title %}{{ recipe.title }}{% endblock title %}
 {% block content %}
   {% include "components/search.html" %}
-  <div class="main-content main-content-detail container">{% include "components/recipe.html" %}</div>
+  <div class="main-content main-content-detail container">
+    {% include "components/recipe.html" %}
+  </div>
 {% endblock %}

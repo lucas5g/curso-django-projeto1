@@ -1,5 +1,11 @@
 <div class="main-content container">
-    <form class="main-form" action="{{ form_action }}" method="post" novalidate>
+    <form 
+        class="main-form" 
+        action="{{ form_action }}"
+        method="post"
+        novalidate
+        enctype="multipart/form-data"
+        >
         {% csrf_token %}
         <div class="form-content form-content-grid">
             {% for field in form %}
