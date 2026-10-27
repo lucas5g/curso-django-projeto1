@@ -7,6 +7,55 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from recipes.models import Recipe
 from django.utils.text import slugify
+from django.views import View
+
+
+class DashboardRecipe(View):
+
+    def _get_recipe(self, id):
+        recipe = Recipe.objects.get(
+            is_published=False,
+            author=self.request.user,
+            pk=id,
+        )
+
+        return recipe
+
+    def _render_recipe(self, form):
+        return render(
+            self.request,
+            "dashboard_recipe.html",
+            context={
+                "form": form
+            },
+        )
+
+    def get(self, request, id):
+        recipe = self._get_recipe(id)
+        form = AuthorRecipeForm(instance=recipe)
+        return self._render_recipe(form)
+
+    def post(self, request, id):
+
+        recipe = self._get_recipe(id)
+
+        form = AuthorRecipeForm(
+            data=request.POST or None, files=request.FILES or None, instance=recipe
+        )
+
+        if form.is_valid():
+            recipe = form.save(commit=False)
+            recipe.author = request.user
+            recipe.preparation_steps_is_html = False
+            recipe.is_published = False
+
+            recipe.save()
+
+            messages.success(request, "Saved with success")
+
+        return self._render_recipe(form)
+        
+
 
 # Create your views here.
 def register_view(request):
@@ -92,50 +141,16 @@ def dashboard(request):
 
 
 @login_required(login_url="authors:login", redirect_field_name="next")
-def dashboard_recipe_edit(request, id):
-    recipe = Recipe.objects.get(
-        is_published=False,
-        author=request.user,
-        pk=id,
-    )
+def dashboard_recipe_new(request):
 
     form = AuthorRecipeForm(
         data=request.POST or None,
         files=request.FILES or None,
-        instance=recipe
-    )
-
-    if form.is_valid():
-        recipe = form.save(commit=False)
-        recipe.author = request.user 
-        recipe.preparation_steps_is_html = False
-        recipe.is_published = False
-
-        recipe.save()
-
-        messages.success(request, "Saved with success")
-
-    return render(request, "dashboard_recipe.html", context={
-        "recipe": recipe,
-        "form": AuthorRecipeForm(
-            data=request.POST or None,
-            instance=recipe
-        )
-    })
-
-
-
-@login_required(login_url="authors:login", redirect_field_name="next")
-def dashboard_recipe_new(request):
-    
-    form = AuthorRecipeForm(
-        data=request.POST or None,
-        files=request.FILES or None,    
     )
 
     if form.is_valid():
         recipe: Recipe = form.save(commit=False)
-        recipe.author = request.user 
+        recipe.author = request.user
         recipe.preparation_steps_is_html = False
         recipe.is_published = False
         recipe.slug = slugify(recipe.title)
@@ -143,11 +158,16 @@ def dashboard_recipe_new(request):
 
         messages.success(request, "Saved with success")
 
-        return redirect('authors:dashboard_recipe_edit', recipe.id)
+        return redirect("authors:dashboard_recipe_edit", recipe.id)
 
-    return render(request, "dashboard_recipe.html", {
-        "form": form,
-    })
+    return render(
+        request,
+        "dashboard_recipe.html",
+        {
+            "form": form,
+        },
+    )
+
 
 @login_required(login_url="authors:login", redirect_field_name="next")
 def dashboard_recipe_delete(request, id):
@@ -164,4 +184,4 @@ def dashboard_recipe_delete(request, id):
     recipe.delete()
     messages.success(request, "Deleted successfully")
 
-    return redirect('authors:dashboard')
+    return redirect("authors:dashboard")
