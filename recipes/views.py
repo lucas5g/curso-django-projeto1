@@ -5,9 +5,83 @@ from django.db.models import Q
 from .models import Recipe
 from utils.pagination import make_pagination
 from django.contrib import messages
+from django.views.generic import ListView, DetailView
+
+PER_PAGE = os.environ.get("PER_PAGE", 6)
 
 
-PER_PAGE = os.environ.get('PER_PAGE', 6)
+class RecipeListViewBase(ListView):
+    model = Recipe
+    context_object_name = "recipes"
+    paginate_by = None
+    ordering = ["-id"]
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+        qs = qs.filter(is_published=True)
+
+        return qs
+
+    def get_context_data(self):
+        ctx = super().get_context_data()
+        search_term = self.request.GET.get('q', '')
+
+        ctx.update(
+            {
+                "page_title": f'Search form "{search_term}"'
+            },
+        )
+
+        return ctx
+
+class RecipeListViewHome(RecipeListViewBase):
+    template_name = 'home.html'
+
+class RecipeListViewCategory(RecipeListViewBase):
+    template_name = 'category.html'
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+        qs = qs.filter(
+            category__id=self.kwargs.get("category_id"),
+            is_published=True,
+        )
+
+        if not qs:
+            raise Http404()
+        
+        return qs
+
+
+class RecipeListViewSearch(RecipeListViewBase):
+    template_name = 'search.html'
+
+    def get_queryset(self):
+        search_term = self.request.GET.get("q", "").strip()
+        qs = super().get_queryset()
+        
+        return qs.filter(
+            Q(title__icontains=search_term)|
+            Q(description__icontains=search_term)
+        ).order_by("-id")
+    
+    def get_context_data(self):
+        ctx = super().get_context_data()
+
+        ctx.update({
+            "search_term": self.request.GET.get('q', '')
+        })
+        return ctx
+
+class RecipeDetail(DetailView):
+    model = Recipe
+    context_object_name = "recipe"
+    template_name = 'recipe.html'
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data()
+        ctx.update({"is_detail_page": True})
+        return ctx
 
 # Create your views here.
 def home(request):
@@ -17,16 +91,19 @@ def home(request):
     ).order_by("-id")
 
     page_obj, pagination_range = make_pagination(request, recipes, PER_PAGE)
-    
-    return render(request, "home.html", context={
-        "recipes": page_obj,
-        "pagination_range": pagination_range,
-    })
 
+    return render(
+        request,
+        "home.html",
+        context={
+            "recipes": page_obj,
+            "pagination_range": pagination_range,
+        },
+    )
 
 
 def category(request, category_id):
-    
+
     recipes = Recipe.objects.filter(
         category__id=category_id,
         is_published=True,
@@ -37,12 +114,15 @@ def category(request, category_id):
 
     page_obj, pagination_range = make_pagination(request, recipes, PER_PAGE)
 
-
-    return render(request, "category.html", context={
-        "recipes": page_obj, 
-        "title": f"{recipes.first().category.name}",
-        "pagination_range":pagination_range,
-    })
+    return render(
+        request,
+        "category.html",
+        context={
+            "recipes": page_obj,
+            "title": f"{recipes.first().category.name}",
+            "pagination_range": pagination_range,
+        },
+    )
 
 
 def recipe(request, id):
@@ -63,19 +143,17 @@ def search(request):
         raise Http404()
 
     recipes = Recipe.objects.filter(
-        Q(title__icontains=search_term) |
-        Q(description__icontains=search_term),
+        Q(title__icontains=search_term) | Q(description__icontains=search_term),
         is_published=True,
     ).order_by("-id")
 
     page_obj, pagination_range = make_pagination(request, recipes, PER_PAGE)
 
-
     return render(
         request,
         "search.html",
         context={
-            "page_title":f'Search for "{search_term}"',
+            "page_title": f'Search for "{search_term}"',
             "search_term": search_term,
             "recipes": page_obj,
             "pagination_range": pagination_range,
