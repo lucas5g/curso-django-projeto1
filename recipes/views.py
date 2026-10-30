@@ -84,6 +84,10 @@ class RecipeDetail(DetailView):
     context_object_name = "recipe"
     template_name = 'recipe.html'
 
+    def get_queryset(self):
+        qs = super().get_queryset()
+        return qs.filter(is_published=True)
+    
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data()
         ctx.update({"is_detail_page": True})
