@@ -3,17 +3,17 @@ from django.http import Http404
 from django.shortcuts import get_object_or_404, render
 from django.db.models import Q
 from .models import Recipe
-from utils.pagination import make_pagination
+from utils.pagination import make_pagination, make_pagination_range
 from django.contrib import messages
 from django.views.generic import ListView, DetailView
 
-PER_PAGE = os.environ.get("PER_PAGE", 6)
+PER_PAGE = int(os.environ.get("PER_PAGE", 6))
 
 
 class RecipeListViewBase(ListView):
     model = Recipe
     context_object_name = "recipes"
-    paginate_by = None
+    paginate_by = PER_PAGE
     ordering = ["-id"]
 
     def get_queryset(self):
@@ -24,11 +24,17 @@ class RecipeListViewBase(ListView):
 
     def get_context_data(self):
         ctx = super().get_context_data()
-        search_term = self.request.GET.get('q', '')
+        page_obj = ctx['page_obj']
+
+        pagination_range = make_pagination_range(
+            page_obj.paginator.page_range, 5,
+            page_obj.number
+        )
 
         ctx.update(
             {
-                "page_title": f'Search form "{search_term}"'
+                "pagination_range": pagination_range,
+                "recipes": page_obj
             },
         )
 
