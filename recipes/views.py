@@ -6,6 +6,8 @@ from .models import Recipe
 from utils.pagination import make_pagination, make_pagination_range
 from django.contrib import messages
 from django.views.generic import ListView, DetailView
+from django.http import JsonResponse
+from django.forms.models import model_to_dict
 
 PER_PAGE = int(os.environ.get("PER_PAGE", 6))
 
@@ -99,6 +101,28 @@ class RecipeDetail(DetailView):
         ctx = super().get_context_data()
         ctx.update({"is_detail_page": True})
         return ctx
+
+class RecipeListViewHomeApi(RecipeListViewBase):
+    # template_name = 'home.html'
+    def render_to_response(self, context, 
+    **response_kwargs):
+        recipes = self.get_context_data()['recipes']
+        recipes_list = recipes.object_list.values()
+        return JsonResponse(list(recipes_list), safe=False)
+
+class RecipeDetailApi(RecipeDetail):
+    def render_to_response(self, context,
+    **response_kwargs):
+        recipe = self.get_context_data()['recipe']
+        recipe_dict = model_to_dict(recipe)
+
+        recipe_dict['created_at'] = str(recipe.created_at)
+        recipe_dict['updated_at'] = str(recipe.updated_at)
+
+        if recipe_dict.get('cover'):
+            recipe_dict['cover'] = self.request.build_absolute_uri(recipe.cover.url)
+
+        return JsonResponse(recipe_dict, safe=False)
 
 # Create your views here.
 def home(request):
