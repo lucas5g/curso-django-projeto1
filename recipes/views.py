@@ -64,6 +64,10 @@ class RecipeListViewSearch(RecipeListViewBase):
 
     def get_queryset(self):
         search_term = self.request.GET.get("q", "").strip()
+
+        if not search_term:
+            raise Http404()
+
         qs = super().get_queryset()
         
         return qs.filter(
@@ -73,9 +77,12 @@ class RecipeListViewSearch(RecipeListViewBase):
     
     def get_context_data(self):
         ctx = super().get_context_data()
+        search_term = self.request.GET.get('q','')
 
         ctx.update({
-            "search_term": self.request.GET.get('q', '')
+            "search_term": search_term,
+
+            "page_title": f'Search for "{search_term}"',
         })
         return ctx
 
