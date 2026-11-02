@@ -1,8 +1,9 @@
 import os
 
 from django.contrib import messages
-from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Q
+from django.db.models.aggregates import Count, Max, Min, Sum
+
 from django.forms.models import model_to_dict
 from django.http import Http404, JsonResponse
 from django.shortcuts import get_object_or_404, render
@@ -23,12 +24,24 @@ def theory(request, *args, **kwargs):
     #     recipes = None
     # recipes = recipes.filter(id=1).order_by('-id').last()
     # recipes = recipes.filter(title__icontains='lasanha').last()
+    #
+    #     recipes = Recipe.objects.filter(
+    #         Q(title__icontains="lasanha", id__gt=2) | Q(id__gt=1000)
+    #     )[:10]
+    # recipes = Recipe.objects.filter(
+    #     id=F('author__id')
+    # ).select_related('author')
 
-    recipes = Recipe.objects.filter(
-        Q(title__icontains="lasanha", id__gt=2) | Q(id__gt=1000)
-    )[:10]
+    # recipes = Recipe.objects.values("id", "title")[:10]
+    # recipes = Recipe.objects.only("id", "title")[:10]
+    # recipes = Recipe.objects.defer('is_published')[:10]
+    # recipes = Recipe.objects.values('id', 'title').filter(author_id__gt=1)
+    # recipes = Recipe.objects.values('id', 'title')[:5]
+    # recipes = Recipe.objects.all()[:5]
+    recipes = Recipe.objects.get_published()[:5]
+    number_of_recipes = recipes.aggregate(Count("id"))
 
-    context = {"recipes": recipes}
+    context = {"recipes": recipes, "number_of_recipes": number_of_recipes["id__count"]}
 
     return render(
         request,

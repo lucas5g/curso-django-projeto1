@@ -7,12 +7,15 @@
     </head>
     <body>
         <h1>Theory</h1>
-        <!--<p>{{recipes.title}}</p>-->
+        <p>Qtd. total de receitas: {{ number_of_recipes}}</p>
         <ul>
             {% for recipe in recipes %}
-                <li>{{recipe.id}} {{recipe.author}} {{recipe.title}}</li>
+            <!--<li>{{recipe}}</li>-->
+            <li>
+                {{recipe.id}} {{recipe.author__username}} {{recipe.title}} {{recipe.author_full_name }}
+            </li>
             {% empty %}
-                <li>No recipes found</li>
+            <li>No recipes found</li>
             {%endfor %}
         </ul>
     </body>
