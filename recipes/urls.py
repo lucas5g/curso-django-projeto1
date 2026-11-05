@@ -10,7 +10,10 @@ urlpatterns = [
     path('recipes/<int:pk>', views.RecipeDetail.as_view(), name='recipe'),
     path('api/recipes', views.RecipeListViewHomeApi.as_view(), name="api_recipes"),
     path('api/recipes/<int:pk>', views.RecipeDetailApi.as_view(), name="api_recipe_detail"),
-    path('recipes/theory', views.theory, name='theory')
+    path('recipes/theory', views.theory, name='theory'),
+    path('recipes/tags/<slug:slug>', views.RecipeListViewTag.as_view(), name='tag'),
+
+
 
 
 ]

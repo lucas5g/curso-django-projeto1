@@ -10,7 +10,7 @@ from django.shortcuts import get_object_or_404, render
 from django.views.generic import DetailView, ListView
 
 from utils.pagination import make_pagination, make_pagination_range
-
+from tags.models import Tag
 from .models import Recipe
 
 PER_PAGE = int(os.environ.get("PER_PAGE", 6))
@@ -60,7 +60,7 @@ class RecipeListViewBase(ListView):
         qs = super().get_queryset()
         qs = qs.filter(is_published=True)
         qs = qs.select_related("author", "category")
-        # qs = qs.prefetch_related("author", "category")
+        qs = qs.prefetch_related("tags")
 
         return qs
 
@@ -134,6 +134,7 @@ class RecipeDetail(DetailView):
 
     def get_queryset(self):
         qs = super().get_queryset()
+        qs = qs.prefetch_related('tags')
         return qs.filter(is_published=True)
 
     def get_context_data(self, **kwargs):
@@ -162,6 +163,35 @@ class RecipeDetailApi(RecipeDetail):
             recipe_dict["cover"] = self.request.build_absolute_uri(recipe.cover.url)
 
         return JsonResponse(recipe_dict, safe=False)
+
+class RecipeListViewTag(RecipeListViewBase):
+    template_name = 'tag.html'
+
+    def get_queryset(self, *args, **kwargs):
+        qs = super().get_queryset(*args, **kwargs)
+        qs = qs.filter(tags__slug=self.kwargs.get("slug"))
+
+        # qs = qs.select_related('author')
+        # qs = qs.prefetch_related('tag')
+        return qs
+
+    def get_context_data(self, *args, **kwargs):
+        ctx = super().get_context_data(*args, **kwargs)
+        page_title = Tag.objects.filter(
+            slug=kwargs.get('slug', '')
+            ).first()
+        
+        if not page_title:
+            page_title = 'No recipes found'
+
+        page_title = f'{page_title} - Tag |'
+        ctx.update({
+            'page_title': page_title,            
+        })
+
+        return ctx
+
+
 
 
 # Create your views here.
