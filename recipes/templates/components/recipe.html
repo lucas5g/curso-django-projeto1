@@ -65,7 +65,7 @@
             <div class="preparation-steps">
                 Tags:
                 {% for tag in recipe.tags.all %}
-                    <a href="{% url 'recipes:tag' tag.slug %}">{{ tag.name }} </a>,
+                    <a href="{% url 'recipes:tag' tag.slug %}">{{ tag.name }}</a>,
                 {% endfor %}
             </div>
         {% endif %}
