@@ -60,3 +60,17 @@ class Recipe(models.Model):
         if not self.slug:
             self.slug = slugify(self.title)
         return super().save(*args, **kwargs)
+
+    def clean(self, *args, **kwargs):
+        error_messages = defaultdict(list)
+
+        recipe_from_db = Recipe.objects.filter(
+            title_iexact=self.title
+        ).exists()
+
+        
+        if recipe_from_db.pk != self.pk:
+            error_messages['title'].append('Found recipes with the same title')
+
+        if error_messages:
+            raise ValidationError(error_messages)
