@@ -5,9 +5,9 @@ from django.db.models.query import F, Value
 from django.urls import reverse
 from django.utils.text import slugify
 from django.contrib.contenttypes.fields import GenericRelation
-
 from tags.models import Tag
-
+from collections import defaultdict
+from django.core.exceptions import ValidationError
 
 class Category(models.Model):
     name = models.CharField(max_length=65)
@@ -65,12 +65,14 @@ class Recipe(models.Model):
         error_messages = defaultdict(list)
 
         recipe_from_db = Recipe.objects.filter(
-            title_iexact=self.title
-        ).exists()
+            title__iexact=self.title
+        ).first()
 
+        # if not recipe_from_db:
+        #     return 
         
         if recipe_from_db.pk != self.pk:
-            error_messages['title'].append('Found recipes with the same title')
+            error_messages['title'].append('Found recipes with the same title...')
 
         if error_messages:
             raise ValidationError(error_messages)

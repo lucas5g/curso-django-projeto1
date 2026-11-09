@@ -18,3 +18,5 @@ ALLOWED_HOSTS = []
 ROOT_URLCONF = 'project.urls'
 
 WSGI_APPLICATION = 'project.wsgi.application'
+
+INTERNAL_IPS = ["127.0.0.1"]

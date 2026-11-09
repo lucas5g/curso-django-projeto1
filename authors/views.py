@@ -9,7 +9,9 @@ from recipes.models import Recipe
 from django.utils.text import slugify
 from django.views import View
 from django.utils.decorators import method_decorator
-
+from django.views.generic import TemplateView
+from .models import Profile
+from django.shortcuts import get_object_or_404
 
 @method_decorator(
     login_required(login_url="authors:login", redirect_field_name="next"),
@@ -154,4 +156,20 @@ def dashboard(request):
     recipes = Recipe.objects.filter(is_published=False, author=request.user)
     return render(request, "dashboard.html", context={"recipes": recipes})
 
+class ProfileView(TemplateView):
+
+    template_name = "profile.html"
+
+    def get(self, request, *args, **kwargs):
+        context = self.get_context_data(**kwargs)
+        profile_id = context.get("id")
+
+        profile = get_object_or_404(Profile.objects.filter(
+            pk=profile_id
+        ).select_related("author"), pk=profile_id)
+
+        return self.render_to_response({
+            **context,
+            "profile": profile
+        })
 
