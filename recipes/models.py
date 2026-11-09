@@ -48,7 +48,7 @@ class Recipe(models.Model):
     author = models.ForeignKey(
         User, on_delete=models.SET_NULL, null=True,
     )
-    tags = models.ManyToManyField(Tag)
+    tags = models.ManyToManyField(Tag, blank=True, default='')
 
     def __str__(self):
         return self.title
@@ -68,8 +68,8 @@ class Recipe(models.Model):
             title__iexact=self.title
         ).first()
 
-        # if not recipe_from_db:
-        #     return 
+        if not recipe_from_db:
+            return 
         
         if recipe_from_db.pk != self.pk:
             error_messages['title'].append('Found recipes with the same title...')
