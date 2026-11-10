@@ -5,3 +5,4 @@ from  .templates import *
 from .security import *
 from .databases import * 
 from .assets import * 
+from .i18n import *

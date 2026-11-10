@@ -12,6 +12,8 @@ from django.views.generic import DetailView, ListView
 from utils.pagination import make_pagination, make_pagination_range
 from tags.models import Tag
 from .models import Recipe
+from django.utils import translation
+from django.utils.translation import gettext as _
 
 PER_PAGE = int(os.environ.get("PER_PAGE", 6))
 
@@ -66,14 +68,18 @@ class RecipeListViewBase(ListView):
 
     def get_context_data(self):
         ctx = super().get_context_data()
-        page_obj = ctx["page_obj"]
-
-        pagination_range = make_pagination_range(
-            page_obj.paginator.page_range, 5, page_obj.number
+        page_obj, pagination_range = make_pagination(
+            self.request, self.get_queryset(), PER_PAGE
         )
 
+        html_language = translation.get_language()
+
         ctx.update(
-            {"pagination_range": pagination_range, "recipes": page_obj},
+            {
+                "pagination_range": pagination_range,
+                "recipes": page_obj,
+                "html_language": html_language,
+            },
         )
 
         return ctx
@@ -134,7 +140,7 @@ class RecipeDetail(DetailView):
 
     def get_queryset(self):
         qs = super().get_queryset()
-        qs = qs.prefetch_related('tags')
+        qs = qs.prefetch_related("tags")
         return qs.filter(is_published=True)
 
     def get_context_data(self, **kwargs):
@@ -164,8 +170,9 @@ class RecipeDetailApi(RecipeDetail):
 
         return JsonResponse(recipe_dict, safe=False)
 
+
 class RecipeListViewTag(RecipeListViewBase):
-    template_name = 'tag.html'
+    template_name = "tag.html"
 
     def get_queryset(self, *args, **kwargs):
         qs = super().get_queryset(*args, **kwargs)
@@ -177,21 +184,19 @@ class RecipeListViewTag(RecipeListViewBase):
 
     def get_context_data(self, *args, **kwargs):
         ctx = super().get_context_data(*args, **kwargs)
-        page_title = Tag.objects.filter(
-            slug=kwargs.get('slug', '')
-            ).first()
-        
-        if not page_title:
-            page_title = 'No recipes found'
+        page_title = Tag.objects.filter(slug=kwargs.get("slug", "")).first()
 
-        page_title = f'{page_title} - Tag |'
-        ctx.update({
-            'page_title': page_title,            
-        })
+        if not page_title:
+            page_title = "No recipes found"
+
+        page_title = f"{page_title} - Tag |"
+        ctx.update(
+            {
+                "page_title": page_title,
+            }
+        )
 
         return ctx
-
-
 
 
 # Create your views here.
