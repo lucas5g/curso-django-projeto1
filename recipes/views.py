@@ -92,6 +92,17 @@ class RecipeListViewHome(RecipeListViewBase):
 class RecipeListViewCategory(RecipeListViewBase):
     template_name = "category.html"
 
+    def get_context_data(self, *args, **kwargs):
+        ctx = super().get_context_data(*args, **kwargs)
+        category_translation = _('Category')
+
+        ctx.update(
+            {
+                "title": f'{ctx["recipes"][0].category.name} - {category_translation}',
+            }
+        )
+        return ctx
+
     def get_queryset(self):
         qs = super().get_queryset()
         qs = qs.filter(
