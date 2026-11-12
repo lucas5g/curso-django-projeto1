@@ -10,3 +10,8 @@ https://pypi.org/project/django-browser-reload/
 
 coverage run --source='.' -m pytest
 coverage html
+
+http://localhost:8887/admin/recipes/recipe/add/
+campos para colocar select
+preparation time unit
+servings unit
