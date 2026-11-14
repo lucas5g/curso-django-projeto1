@@ -11,7 +11,7 @@ from django.views.generic import DetailView, ListView
 
 from utils.pagination import make_pagination, make_pagination_range
 from tags.models import Tag
-from .models import Recipe
+from ..models import Recipe
 from django.utils import translation
 from django.utils.translation import gettext as _
 
