@@ -9,6 +9,9 @@ from tags.models import Tag
 from collections import defaultdict
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
+from django.conf import settings
+from PIL import Image
+import os
 
 class Category(models.Model):
     name = models.CharField(max_length=65)
@@ -57,10 +60,35 @@ class Recipe(models.Model):
     def get_absolute_url(self):
         return reverse("recipes:recipe", args=(self.id,))
 
+    @staticmethod
+    def resize_image(image, new_width=800):
+        image_full_path = os.path.join(settings.MEDIA_ROOT, image.name)
+        image_pil = Image.open(image_full_path)
+        original_width, original_heith = image_pil.size 
+
+        if original_width <= new_width:
+            image_pil.close()
+            return
+        
+        new_height = round((new_width * original_heith) / original_width)
+
+        # new_image = image_pil.resize((), Image.LANCZOS)
+        new_image = image_pil.resize((new_width, new_height), Image.Resampling.LANCZOS)
+
+        new_image.save(
+            image_full_path, optimize=True, quality=50
+        )
+
     def save(self, *args, **kwargs):
         if not self.slug:
             self.slug = slugify(self.title)
-        return super().save(*args, **kwargs)
+        
+        saved =  super().save(*args, **kwargs)
+        if self.cover:
+            self.resize_image(self.cover, 800)
+        
+        return saved
+
 
     def clean(self, *args, **kwargs):
         error_messages = defaultdict(list)
