@@ -28,7 +28,8 @@ class RecipeManager(models.Manager):
                 F("author__first_name"), Value("("),
                 F("author__username"), Value(')')
             )
-        )
+        ).order_by('-id').select_related('category', 'author').prefetch_related('tags')
+
 
 # Create your models here.
 class Recipe(models.Model):
@@ -64,12 +65,12 @@ class Recipe(models.Model):
     def resize_image(image, new_width=800):
         image_full_path = os.path.join(settings.MEDIA_ROOT, image.name)
         image_pil = Image.open(image_full_path)
-        original_width, original_heith = image_pil.size 
+        original_width, original_heith = image_pil.size
 
         if original_width <= new_width:
             image_pil.close()
             return
-        
+
         new_height = round((new_width * original_heith) / original_width)
 
         # new_image = image_pil.resize((), Image.LANCZOS)
@@ -82,11 +83,11 @@ class Recipe(models.Model):
     def save(self, *args, **kwargs):
         if not self.slug:
             self.slug = slugify(self.title)
-        
+
         saved =  super().save(*args, **kwargs)
         if self.cover:
             self.resize_image(self.cover, 800)
-        
+
         return saved
 
 
@@ -98,8 +99,8 @@ class Recipe(models.Model):
         ).first()
 
         if not recipe_from_db:
-            return 
-        
+            return
+
         if recipe_from_db.pk != self.pk:
             error_messages['title'].append('Found recipes with the same title...')
 

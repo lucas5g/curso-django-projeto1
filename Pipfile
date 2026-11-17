@@ -13,6 +13,7 @@ coverage = "*"
 python-dotenv = "*"
 parameterized = "*"
 django-debug-toolbar = "*"
+djangorestframework = "*"
 
 [dev-packages]
 django-browser-reload = "*"
