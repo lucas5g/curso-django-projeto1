@@ -13,6 +13,7 @@ urlpatterns = [
     path('recipes/theory', views.theory, name='theory'),
     path('recipes/tags/<slug:slug>', views.RecipeListViewTag.as_view(), name='tag'),
     path('api/recipes', views.api.recipe_api_list, name='recipes_api_v2' ),
-    path('api/recipes/<int:pk>', views.api.recipe_api_detail, name='recipes_api_v2_detail' )
+    path('api/recipes/<int:pk>', views.api.recipe_api_detail, name='recipes_api_v2_detail' ),
+    path('api/recipes/tag/<int:pk>', views.tag_api_detail, name='recipes_api_v2_tag')
 
 ]
