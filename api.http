@@ -1,0 +1,10 @@
+GET http://localhost:8887/api/recipes
+
+### Criar
+POST http://localhost:8887/api/recipes
+Content-Type: application/json
+
+{
+    "title":"Este é o título",
+    "description":"Este é o título"
+}
