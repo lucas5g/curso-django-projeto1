@@ -16,7 +16,7 @@ class TagSerializer(serializers.Serializer):
     # slug = serializers.SlugField()
 
 
-class RecipeSerializer(serializers.Serializer):
+class RecipeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Recipe
         fields = [
@@ -24,6 +24,13 @@ class RecipeSerializer(serializers.Serializer):
             "title",
             "description",
             "author",
+            "public",
+            "preparation_time",
+            "category",
+            "tags",
+            "tag_objects",
+            "tag_links"
+
         ]
 
     public = serializers.BooleanField(source="is_published", read_only=True)
@@ -39,38 +46,48 @@ class RecipeSerializer(serializers.Serializer):
     #     queryset=Category.objects.all()
     # )
     # author= serializers.StringRelatedField()
-    author = serializers.PrimaryKeyRelatedField(queryset=User.objects.all())
-    tags = serializers.PrimaryKeyRelatedField(queryset=Tag.objects.all(), many=True)
+    author = serializers.PrimaryKeyRelatedField(queryset=User.objects.all(), required=False)
+    tags = serializers.PrimaryKeyRelatedField(queryset=Tag.objects.all(), many=True, required=False)
     tag_objects = TagSerializer(many=True, source="tags", read_only=True)
     tag_links = serializers.HyperlinkedRelatedField(
         many=True,
         source="tags",
         queryset=Tag.objects.all(),
         view_name="recipes:recipes_api_v2_tag",
+        required=False
     )
 
     def any_method_name(self, recipe):
         return f"{recipe.preparation_time} {recipe.preparation_time_unit}"
 
-    def validate(self, *args, **kwargs):
-        print('validando')
-        super_validate = super().clean(*args, **kwargs)
-
-        cd= self.cleaned_data
-        # _my_errors = defaultdict(list)
-
-        title = cd.get('title')
-        description = cd.get('description')
+    def validate(self, attrs):
+        title = attrs.get("title")
+        description = attrs.get("description")
 
         if title == description:
-            self._my_errors['title'].append('Precisa ser diferente do description')
-            self._my_errors['description'].append('Precisa ser diferente do title')
-        
-        if self._my_errors:
-            raise ValidationError(self._my_errors)
-            # raise serializers.ValidationError(_my_errors)
+            raise serializers.ValidationError({
+                "title": ["Precisa ser diferente da descrição"],
+                "description": ["Precisa ser diferente do título"]
+            })
+        return attrs
+        # print('validando')
+        # super_validate = super().clean(*args, **kwargs)
 
-        return super_validate
+        # cd= self.cleaned_data
+        # _my_errors = defaultdict(list)
+
+        # title = cd.get('title')
+        # description = cd.get('description')
+
+        # if title == description:
+        #     self._my_errors['title'].append('Precisa ser diferente do description')
+        #     self._my_errors['description'].append('Precisa ser diferente do title')
+        
+        # if self._my_errors:
+        #     raise ValidationError(self._my_errors)
+        #     # raise serializers.ValidationError(_my_errors)
+
+        # return super_validate
 
     def validate_title(self, value):
         if len(value) < 5:

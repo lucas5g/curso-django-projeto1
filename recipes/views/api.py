@@ -14,7 +14,7 @@ def recipe_api_list(request):
         serializer= RecipeSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
-        return Response({"detail": "Post realizado com sucesso!"}, status=status.HTTP_201_CREATED)
+        return Response(serializer.validated_data, status=status.HTTP_201_CREATED)
 
     recipes = Recipe.objects.get_published()[:10]
     serializer = RecipeSerializer(
