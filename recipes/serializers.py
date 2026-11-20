@@ -1,10 +1,8 @@
 from django.contrib.auth.models import User
 from rest_framework import serializers
-
 from tags.models import Tag
-
 from .models import Category, Recipe
-
+from authors.validators import AuthorRecipeValidator
 
 class TagSerializer(serializers.Serializer):
     class Meta:
@@ -26,6 +24,9 @@ class RecipeSerializer(serializers.ModelSerializer):
             "author",
             "public",
             "preparation_time",
+            "preparation",
+            "servings",
+            "servings_unit",
             "category",
             "tags",
             "tag_objects",
@@ -61,40 +62,15 @@ class RecipeSerializer(serializers.ModelSerializer):
         return f"{recipe.preparation_time} {recipe.preparation_time_unit}"
 
     def validate(self, attrs):
-        title = attrs.get("title")
-        description = attrs.get("description")
 
-        if title == description:
-            raise serializers.ValidationError({
-                "title": ["Precisa ser diferente da descrição"],
-                "description": ["Precisa ser diferente do título"]
-            })
-        return attrs
-        # print('validando')
-        # super_validate = super().clean(*args, **kwargs)
+        if self.instance is not None and attrs.get('servings') is None:
+            attrs['servings'] = self.instance.servings 
 
-        # cd= self.cleaned_data
-        # _my_errors = defaultdict(list)
+        if self.instance is not None and attrs.get('preparation_time') is None:
+            attrs['preparation_time'] = self.instance.preparation_time
 
-        # title = cd.get('title')
-        # description = cd.get('description')
-
-        # if title == description:
-        #     self._my_errors['title'].append('Precisa ser diferente do description')
-        #     self._my_errors['description'].append('Precisa ser diferente do title')
-        
-        # if self._my_errors:
-        #     raise ValidationError(self._my_errors)
-        #     # raise serializers.ValidationError(_my_errors)
-
-        # return super_validate
-
-    def validate_title(self, value):
-        if len(value) < 5:
-            raise serializers.ValidationError("Must have at least 5 chars")
-        return value
-
-# class RecipeSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = Recipe
-#         fields = ['id', 'title', 'description']
+        super_validate = super().validate(attrs)
+        AuthorRecipeValidator(
+            data=attrs, ErrorClass=serializers.ValidationError
+        )
+        return super_validate

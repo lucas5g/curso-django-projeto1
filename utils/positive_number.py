@@ -1,6 +1,3 @@
-def positive_number(value):
-
-    if value > 0:
-        return True
-    else:
-        return False
+def is_positive_number(value):
+    return value is not None and value > 0
+   

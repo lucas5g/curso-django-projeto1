@@ -13,7 +13,9 @@ def recipe_api_list(request):
     if request.method == "POST":
         serializer= RecipeSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        serializer.save()
+        serializer.save(
+            author_id=1, category_id=1, tags=[1, 2]
+        )
         return Response(serializer.validated_data, status=status.HTTP_201_CREATED)
 
     recipes = Recipe.objects.get_published()[:10]
@@ -23,13 +25,28 @@ def recipe_api_list(request):
     return Response(serializer.data)
 
 
-@api_view()
+@api_view(['get', 'patch', 'delete'])
 def recipe_api_detail(request, pk):
     recipe = get_object_or_404(Recipe.objects.get_published(), pk=pk)
 
+    if request.method == "PATCH":
+        serializer = RecipeSerializer(
+            instance=recipe, data=request.data, partial=True, context={"request": request}
+        )
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data)
+
+    if request.method == 'DELETE':
+        recipe.delete()
+        return Response({
+            'message': 'Recipe was deleted successfully'
+        }, status=status.HTTP_204_NO_CONTENT)
+
     serializer = RecipeSerializer(
-        instance=recipe, many=False, context={"request", request}
+        instance=recipe, many=False, context={"request": request}
     )
+
     return Response(serializer.data)
 
 

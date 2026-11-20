@@ -12,6 +12,7 @@ from django.utils.translation import gettext_lazy as _
 from django.conf import settings
 from PIL import Image
 import os
+import random
 
 class Category(models.Model):
     name = models.CharField(max_length=65)
@@ -82,7 +83,7 @@ class Recipe(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.slug:
-            self.slug = slugify(self.title)
+            self.slug = slugify(self.title + str(random.randint(1,100)))
 
         saved =  super().save(*args, **kwargs)
         if self.cover:
