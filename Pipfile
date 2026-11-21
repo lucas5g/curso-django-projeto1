@@ -14,6 +14,7 @@ python-dotenv = "*"
 parameterized = "*"
 django-debug-toolbar = "*"
 djangorestframework = "*"
+djangorestframework-simplejwt = "*"
 
 [dev-packages]
 django-browser-reload = "*"

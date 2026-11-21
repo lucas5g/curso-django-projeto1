@@ -9,6 +9,7 @@ INSTALLED_APPS = [
     'django_browser_reload',
     'debug_toolbar',
     # Django rest framework
+    'rest_framework_simplejwt',
     'rest_framework',
     # Estes são nossos apps
     'recipes',
