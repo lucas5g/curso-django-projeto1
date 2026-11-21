@@ -9,33 +9,52 @@ from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
 from rest_framework.pagination import PageNumberPagination
+from rest_framework.viewsets import ModelViewSet
 
 
 class RecipeAPIv2Pagination(PageNumberPagination):
     page_size = 5
 
 
-class RecipeAPIv2List(ListCreateAPIView):
+class RecipeAPIv2ViewSet(ModelViewSet):
     queryset = Recipe.objects.get_published()
     serializer_class = RecipeSerializer
     pagination_class = RecipeAPIv2Pagination
 
+    def get_queryset(self):
+        qs = super().get_queryset()
 
-class RecipeAPIv2Detail(RetrieveUpdateDestroyAPIView):
-    queryset = Recipe.objects.get_published()
-    serializer_class = RecipeSerializer
+        print('Parâmetros ', self.kwargs)
+        print('Query strings ',  self.request.query_params)
 
-    def patch(self, request, *args, **kwargs):
-        recipe = self.get_object()
+        category_id = self.request.query_params.get('category_id', None)
 
-        serializer = self.get_serializer(
-            instance=recipe, data=request.data, partial=True
-        )
+        if category_id and category_id.isnumeric():
+            qs = qs.filter(category_id=category_id)
 
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
+        return qs
 
-        return Response(serializer.data)
+# class RecipeAPIv2List(ListCreateAPIView):
+#     queryset = Recipe.objects.get_published()
+#     serializer_class = RecipeSerializer
+#     pagination_class = RecipeAPIv2Pagination
+
+
+# class RecipeAPIv2Detail(RetrieveUpdateDestroyAPIView):
+#     queryset = Recipe.objects.get_published()
+#     serializer_class = RecipeSerializer
+
+#     def patch(self, request, *args, **kwargs):
+#         recipe = self.get_object()
+
+#         serializer = self.get_serializer(
+#             instance=recipe, data=request.data, partial=True
+#         )
+
+#         serializer.is_valid(raise_exception=True)
+#         serializer.save()
+
+#         return Response(serializer.data)
 
 # class RecipeAPIv2List(ListCreateAPIView):
 # queryset = Recipe.objects.get_published()
