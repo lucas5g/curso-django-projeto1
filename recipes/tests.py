@@ -257,9 +257,13 @@ class RecipeModelTest(TestCase):
 
 class RecipeAPIV2Test(test.APITestCase):
 
+    accessToken=''
+
     def setUp(self):
-        category = Category.objects.create(name='Café da manhã')
-        author =  User.objects.create_user(
+        category_1 = Category.objects.create(name="Café da manhã")
+        category_2 = Category.objects.create(name="Almoço")
+
+        author = User.objects.create_user(
             first_name="user",
             last_name="name",
             username="username",
@@ -267,8 +271,8 @@ class RecipeAPIV2Test(test.APITestCase):
             email="username@mail.com",
         )
 
-        recipe = Recipe.objects.create(
-            category=category,
+        Recipe.objects.create(
+            category=category_1,
             author=author,
             title="Recipe Title",
             description="Recipe Description",
@@ -281,6 +285,25 @@ class RecipeAPIV2Test(test.APITestCase):
             is_published=True,
         )
 
+        Recipe.objects.create(
+            category=category_2,
+            author=author,
+            title="Recipe Title 2",
+            description="Recipe Description",
+            slug="recipe-title-2",
+            preparation_time=10,
+            preparation_time_unit="minutes",
+            servings=5,
+            servings_unit="portions",
+            preparation_steps="Recipe Preparation Steps",
+            is_published=True,
+        )
+
+        response = self.client.post(
+            "/recipes/api/token/", data={"username": "username", "password": "123456"}
+        )
+        
+        self.accessToken = response.data["access"]
 
     def test_recipe_api_list_returns_status_code_200(self):
         api_url = reverse("recipes:recipe-api-list")
@@ -324,6 +347,42 @@ class RecipeAPIV2Test(test.APITestCase):
         recipe.is_published = False
         recipe.save()
         response = self.client.get(reverse("recipes:recipe-api-list"))
-        
-        self.assertEqual(response.data['count'], 0)
 
+        self.assertEqual(response.data["count"], 0)
+
+    def test_recipe_api_list_loads_recipes_by_category_id(self):
+        category_id = 2
+        category = Category.objects.get(pk=category_id)
+
+        response = self.client.get(
+            reverse("recipes:recipe-api-list") + f"?category_id={category_id}"
+        )
+
+        self.assertEqual(response.data["results"][0]["category"], category.name)
+
+    def test_recipe_api_list_user_must_send_jwt_token_to_create_recipe(self):
+        response = self.client.post(reverse("recipes:recipe-api-list"))
+
+        self.assertEqual(response.status_code, 401)
+
+    def test_recipe_api_list_logged_user_can_create_a_recipe(self):
+        
+        response = self.client.post(
+            reverse("recipes:recipe-api-list"),
+            data={
+                "category": 1,
+                "author": 1,
+                "title": "Recipe Title",
+                "description": "Recipe Description",
+                "slug": "recipe-title",
+                "preparation_time": 10,
+                "preparation_time_unit": "minutes",
+                "servings": 5,
+                "servings_unit": "portions",
+                "preparation_steps": "Recipe Preparation Steps",
+                "is_published": True,
+            },
+            HTTP_AUTHORIZATION=f'Bearer {self.accessToken}'
+        )
+
+        self.assertEqual(response.status_code, 201)
