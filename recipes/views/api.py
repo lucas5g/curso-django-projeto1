@@ -10,7 +10,8 @@ from rest_framework.views import APIView
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.viewsets import ModelViewSet
-
+from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
+from ..permissions import IsOwner
 
 class RecipeAPIv2Pagination(PageNumberPagination):
     page_size = 5
@@ -20,6 +21,9 @@ class RecipeAPIv2ViewSet(ModelViewSet):
     queryset = Recipe.objects.get_published()
     serializer_class = RecipeSerializer
     pagination_class = RecipeAPIv2Pagination
+    # permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticatedOrReadOnly]
+    http_method_names = ['get', 'post', 'patch', 'delete']
 
     def get_queryset(self):
         qs = super().get_queryset()
@@ -34,6 +38,47 @@ class RecipeAPIv2ViewSet(ModelViewSet):
 
         return qs
 
+    def get_object(self):
+        pk = self.kwargs.get('pk', '')
+        obj = get_object_or_404(
+            self.get_queryset(),
+            pk=pk
+        )
+
+        self.check_object_permissions(self.request, obj)
+        return obj 
+
+    def get_permissions(self):
+        if self.request.method in ['PATCH', 'DELETE']:
+            return [IsOwner()]
+
+        # if self.request.method == 'POST':
+        #     return []
+
+        return super().get_permissions()
+
+    def create(self, request):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save(author=self.request.user)
+        # self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
+    def patch(self, request, *args, **kwargs):
+       
+        recipe = self.get_object()
+
+        serializer = self.get_serializer(
+            instance=recipe, data=request.data, partial=True
+        )
+
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        return Response(serializer.data)
+
+
 # class RecipeAPIv2List(ListCreateAPIView):
 #     queryset = Recipe.objects.get_published()
 #     serializer_class = RecipeSerializer
@@ -44,17 +89,7 @@ class RecipeAPIv2ViewSet(ModelViewSet):
 #     queryset = Recipe.objects.get_published()
 #     serializer_class = RecipeSerializer
 
-#     def patch(self, request, *args, **kwargs):
-#         recipe = self.get_object()
 
-#         serializer = self.get_serializer(
-#             instance=recipe, data=request.data, partial=True
-#         )
-
-#         serializer.is_valid(raise_exception=True)
-#         serializer.save()
-
-#         return Response(serializer.data)
 
 # class RecipeAPIv2List(ListCreateAPIView):
 # queryset = Recipe.objects.get_published()
