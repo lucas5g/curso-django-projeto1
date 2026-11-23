@@ -5,26 +5,28 @@ from recipes.models import Category, Recipe, User
 from unittest import skip
 from django.core.exceptions import ValidationError
 from unittest.mock import patch
+from rest_framework import test
+
 
 # Create your tests here.
 class RecipeURLsTest(TestCase):
 
-
     def test_recipe_home_url_is_correct(self):
-        url = reverse('recipes:home')
-        self.assertEqual(url, '/')
+        url = reverse("recipes:home")
+        self.assertEqual(url, "/")
 
     def test_recipe_category_url_is_correct(self):
-        url = reverse('recipes:category', kwargs={'category_id': 1})
-        self.assertEqual(url, '/recipes/category/1/')
+        url = reverse("recipes:category", kwargs={"category_id": 1})
+        self.assertEqual(url, "/recipes/category/1/")
 
     def test_recipe_details_url_is_correct(self):
-        url = reverse('recipes:recipe', kwargs={'pk': 1})
-        self.assertEqual(url, '/recipes/1')
+        url = reverse("recipes:recipe", kwargs={"pk": 1})
+        self.assertEqual(url, "/recipes/1")
 
     def test_recipe_search_url_is_correct(self):
-        url = reverse('recipes:search')
-        self.assertEqual(url, '/recipes/search/')
+        url = reverse("recipes:search")
+        self.assertEqual(url, "/recipes/search/")
+
 
 class RecipeViewsTest(TestCase):
 
@@ -35,7 +37,7 @@ class RecipeViewsTest(TestCase):
             last_name="name",
             username="username",
             password="123456",
-            email="username@mail.com"
+            email="username@mail.com",
         )
 
         recipe = Recipe.objects.create(
@@ -65,51 +67,41 @@ class RecipeViewsTest(TestCase):
         self.assertIs(view.func.view_class, views.RecipeDetail)
 
     def test_recipe_home_view_returns_status_code_200_ok(self):
-        response = self.client.get(reverse('recipes:home'))
+        response = self.client.get(reverse("recipes:home"))
         self.assertEqual(response.status_code, 200)
 
     def test_recipe_home_view_loads_correct_template(self):
-        response = self.client.get(reverse('recipes:home'))
-        self.assertTemplateUsed(response, 'home.html')
+        response = self.client.get(reverse("recipes:home"))
+        self.assertTemplateUsed(response, "home.html")
 
     def test_recipe_home_template_shows_no_recipes_found_if_no_recipe(self):
         Recipe.objects.filter(pk=1).delete()
 
-        response = self.client.get(reverse('recipes:home'))
+        response = self.client.get(reverse("recipes:home"))
 
-        self.assertIn('No recipes found here',
-                      response.content.decode('utf-8'))
+        self.assertIn("No recipes found here", response.content.decode("utf-8"))
 
     def test_recipe_category_view_funcion_is_correct(self):
-        view = resolve(
-            reverse('recipes:category', kwargs={'category_id': 1})
-        )
+        view = resolve(reverse("recipes:category", kwargs={"category_id": 1}))
         self.assertIs(view.func.view_class, views.RecipeListViewCategory)
 
     def test_recipe_detail_view_function_is_correct(self):
-        view = resolve(
-            reverse('recipes:recipe', kwargs={'pk': 1})
-        )
+        view = resolve(reverse("recipes:recipe", kwargs={"pk": 1}))
         self.assertIs(view.func.view_class, views.RecipeDetail)
-
 
     def test_recipe_detail_view_returns_404_if_no_recipes_found(self):
 
-        response = self.client.get(
-            reverse('recipes:recipe', kwargs={'pk': 404})
-        )
+        response = self.client.get(reverse("recipes:recipe", kwargs={"pk": 404}))
         self.assertEqual(response.status_code, 404)
 
-
     def test_recipe_home_template_loads_recipes(self):
-        response = self.client.get(reverse('recipes:home'))
-        content = response.content.decode('utf-8')
-        response_context = response.context['recipes']
-        self.assertIn('Recipe Title', content)
-        self.assertIn('10 minutes', content)
-        self.assertIn('5 portions', content)
+        response = self.client.get(reverse("recipes:home"))
+        content = response.content.decode("utf-8")
+        response_context = response.context["recipes"]
+        self.assertIn("Recipe Title", content)
+        self.assertIn("10 minutes", content)
+        self.assertIn("5 portions", content)
         self.assertEqual(len(response_context), 1)
-
 
     def test_recipe_home_template_dont_load_recipes_not_published(self):
 
@@ -117,86 +109,80 @@ class RecipeViewsTest(TestCase):
         recipe.is_published = False
         recipe.save()
 
-        response = self.client.get(reverse('recipes:home'))
+        response = self.client.get(reverse("recipes:home"))
 
-        self.assertIn(
-            'No recipes found here',
-            response.content.decode('utf-8')
-        )
+        self.assertIn("No recipes found here", response.content.decode("utf-8"))
 
     def test_recipe_search_loads_correct_template(self):
-        response = self.client.get(reverse('recipes:search') + '?q=teste')
+        response = self.client.get(reverse("recipes:search") + "?q=teste")
 
-        self.assertTemplateUsed(response, 'search.html')
-
+        self.assertTemplateUsed(response, "search.html")
 
     def test_recipe_search_raises_404_if_no_search_term(self):
         response = self.client.get(reverse("recipes:search"))
         self.assertEqual(response.status_code, 404)
 
     def test_recipe_search_term_is_on_page_title_and_escaped(self):
-        url = reverse('recipes:search') + '?q=Teste'
+        url = reverse("recipes:search") + "?q=Teste"
         response = self.client.get(url)
 
-        self.assertIn(
-            'Search for &quot;Teste&quot;',
-            response.content.decode("utf-8")
-        )
+        self.assertIn("Search for &quot;Teste&quot;", response.content.decode("utf-8"))
 
     def test_recipe_search_can_find_recipe_by_title(self):
-        title1 = 'This is recipe one'
-        title2 = 'This is recipe two'
+        title1 = "This is recipe one"
+        title2 = "This is recipe two"
 
         recipe1 = Recipe.objects.get(pk=1)
         recipe1.title = title1
-        recipe1.save();
+        recipe1.save()
 
-        recipe2 = Recipe.objects.create(            category=Recipe.objects.get(pk=1).category,
+        recipe2 = Recipe.objects.create(
+            category=Recipe.objects.get(pk=1).category,
             author=Recipe.objects.get(pk=1).author,
             title=title2,
-            description='Recipe Description',
-            slug='recipe-title-2',
+            description="Recipe Description",
+            slug="recipe-title-2",
             preparation_time=10,
-            preparation_time_unit='minutes',
+            preparation_time_unit="minutes",
             servings=5,
-            servings_unit='portions',
-            preparation_steps='Recipe Preparation Steps',
+            servings_unit="portions",
+            preparation_steps="Recipe Preparation Steps",
             is_published=True,
-        )      
+        )
         recipe2.save()
-    
-        search_url = reverse('recipes:search') 
-        
+
+        search_url = reverse("recipes:search")
+
         response1 = self.client.get(f"{search_url}?q={title1}")
         response2 = self.client.get(f"{search_url}?query={title2}")
-        response_both =  self.client.get(f'{search_url}?q=this')
+        response_both = self.client.get(f"{search_url}?q=this")
 
-        self.assertIn(recipe1, response1.context['recipes'])
-        self.assertNotIn(recipe2, response1.context['recipes'])
+        self.assertIn(recipe1, response1.context["recipes"])
+        self.assertNotIn(recipe2, response1.context["recipes"])
 
-        self.assertIn(recipe1, response_both.context['recipes'])
-        self.assertIn(recipe2, response_both.context['recipes'])
+        self.assertIn(recipe1, response_both.context["recipes"])
+        self.assertIn(recipe2, response_both.context["recipes"])
 
     def test_recipe_home_is_paginated(self):
         for i in range(8):
             recipe = Recipe.objects.create(
                 category=Recipe.objects.get(pk=1).category,
                 author=Recipe.objects.get(pk=1).author,
-                title=f'Recipe {i}',
-                description='Recipe Description',
-                slug=f'recipe-{i}',
+                title=f"Recipe {i}",
+                description="Recipe Description",
+                slug=f"recipe-{i}",
                 preparation_time=10,
-                preparation_time_unit='minutes',
+                preparation_time_unit="minutes",
                 servings=5,
-                servings_unit='portions',
-                preparation_steps='Recipe Preparation Steps',
+                servings_unit="portions",
+                preparation_steps="Recipe Preparation Steps",
                 is_published=True,
             )
             recipe.save()
 
         with patch.object(views.RecipeListViewHome, "paginate_by", 3):
-            response = self.client.get(reverse('recipes:home'))
-            recipes = response.context['recipes']
+            response = self.client.get(reverse("recipes:home"))
+            recipes = response.context["recipes"]
             paginator = recipes.paginator
             self.assertEqual(paginator.num_pages, 3)
 
@@ -215,7 +201,7 @@ class RecipeModelTest(TestCase):
             last_name="name",
             username="username",
             password="123456",
-            email="username@mail.com"
+            email="username@mail.com",
         )
 
         recipe = Recipe.objects.create(
@@ -234,26 +220,25 @@ class RecipeModelTest(TestCase):
 
     def test_recipe_title_raise_error_if_title_has_more_then_65_chars(self):
         recipe = Recipe.objects.filter(pk=1).first()
-        recipe.title = 'A' * 70
+        recipe.title = "A" * 70
 
         with self.assertRaises(ValidationError):
             recipe.full_clean()  # save() não valida; full_clean() checa max_length
 
-
     def test_recipe_fields_max_lenght(self):
         fields = [
-            ('title', 65),
-            ('description', 165),
-            ('preparation_time_unit', 65),
-            ('servings_unit', 65),
-            ('slug', 65),
+            ("title", 65),
+            ("description", 165),
+            ("preparation_time_unit", 65),
+            ("servings_unit", 65),
+            ("slug", 65),
         ]
 
         for field, max_lenght in fields:
             # subTest mostra qual campo falhou, sem parar no primeiro
             with self.subTest(field=field, max_lenght=max_lenght):
                 recipe = Recipe.objects.filter(pk=1).first()
-                setattr(recipe, field, 'A' * (max_lenght + 1))
+                setattr(recipe, field, "A" * (max_lenght + 1))
                 with self.assertRaises(ValidationError):
                     recipe.full_clean()
 
@@ -262,10 +247,83 @@ class RecipeModelTest(TestCase):
         recipe.preparation_steps_is_html = False
         # recipe.save()
 
-
         self.assertFalse(recipe.preparation_steps_is_html)
 
     def test_recipe_is_published_is_false_by_default(self):
-        recipe =Recipe.objects.filter(pk=1).first()
+        recipe = Recipe.objects.filter(pk=1).first()
         recipe.is_published = False
         self.assertFalse(recipe.is_published)
+
+
+class RecipeAPIV2Test(test.APITestCase):
+
+    def setUp(self):
+        category = Category.objects.create(name='Café da manhã')
+        author =  User.objects.create_user(
+            first_name="user",
+            last_name="name",
+            username="username",
+            password="123456",
+            email="username@mail.com",
+        )
+
+        recipe = Recipe.objects.create(
+            category=category,
+            author=author,
+            title="Recipe Title",
+            description="Recipe Description",
+            slug="recipe-title",
+            preparation_time=10,
+            preparation_time_unit="minutes",
+            servings=5,
+            servings_unit="portions",
+            preparation_steps="Recipe Preparation Steps",
+            is_published=True,
+        )
+
+
+    def test_recipe_api_list_returns_status_code_200(self):
+        api_url = reverse("recipes:recipe-api-list")
+        response = self.client.get(api_url)
+
+        self.assertEqual(response.status_code, 200)
+
+    @patch("recipes.views.api.RecipeAPIv2Pagination.page_size", new=7)
+    def test_recipe_api_list_loads_correct_number_of_recipes(self):
+        wanted_recipes = 7
+
+        for i in range(wanted_recipes):
+            category = Category.objects.create(name=f"Category {i}")
+            author = User.objects.create_user(
+                first_name=f"user{i}",
+                last_name=f"name{i}",
+                username=f"username{i}",
+                password="123456",
+                email=f"username{i}@mail.com",
+            )
+
+            recipe = Recipe.objects.create(
+                category=category,
+                author=author,
+                title=f"Recipe Title {i}",
+                description="Recipe Description",
+                slug=f"recipe-title-{i}",
+                preparation_time=10,
+                preparation_time_unit="minutes",
+                servings=5,
+                servings_unit="portions",
+                preparation_steps="Recipe Preparation Steps",
+                is_published=True,
+            )
+        response = self.client.get(reverse("recipes:recipe-api-list"))
+        qtd_recipes_received = len(response.data.get("results"))
+        self.assertEqual(wanted_recipes, qtd_recipes_received)
+
+    def test_recipe_api_list_do_not_show_not_published_recipes(self):
+        recipe = Recipe.objects.get(pk=1)
+        recipe.is_published = False
+        recipe.save()
+        response = self.client.get(reverse("recipes:recipe-api-list"))
+        
+        self.assertEqual(response.data['count'], 0)
+
