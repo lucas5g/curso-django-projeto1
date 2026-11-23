@@ -30,7 +30,8 @@ class RecipeSerializer(serializers.ModelSerializer):
             "category",
             "tags",
             "tag_objects",
-            "tag_links"
+            "tag_links",
+            "cover"
 
         ]
 

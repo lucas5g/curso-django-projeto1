@@ -1,8 +1,13 @@
-from django.urls import path 
+from django.urls import path, include
+from rest_framework.routers import SimpleRouter
 
 from .  import views
 
 app_name = 'authors'
+
+author_api_router = SimpleRouter()
+author_api_router.register('api', views.AuthorViewSet, basename='authors-api')
+
 
 urlpatterns = [
     path('register', views.register_view, name='register'),
@@ -15,6 +20,7 @@ urlpatterns = [
     path('dashboard/recipe/<int:id>/edit', views.DashboardRecipe.as_view(), name='dashboard_recipe_edit'),
     path('dashboard/recipe/<int:id>/delete', views.DashboardRecipeDelete.as_view(), name='dashboard_recipe_delete'),
     path('profiles/<int:id>', views.ProfileView.as_view(), name='profile'),
+    path('', include(author_api_router.urls))
 
 ]
 
