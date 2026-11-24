@@ -263,13 +263,17 @@ class RecipeAPIV2Test(test.APITestCase):
         category_1 = Category.objects.create(name="Café da manhã")
         category_2 = Category.objects.create(name="Almoço")
 
-        author = User.objects.create_user(
-            first_name="user",
-            last_name="name",
-            username="username",
-            password="123456",
-            email="username@mail.com",
-        )
+        for i in range(2):
+            User.objects.create_user(
+                first_name=f"user{i}",
+                last_name=f"name{i}",
+                username=f"username{i}",
+                password="123456",
+                email=f"username{i}@mail.com",
+            )
+
+        author = User.objects.get(pk=1)
+        
 
         Recipe.objects.create(
             category=category_1,
@@ -300,7 +304,7 @@ class RecipeAPIV2Test(test.APITestCase):
         )
 
         response = self.client.post(
-            "/recipes/api/token/", data={"username": "username", "password": "123456"}
+            "/recipes/api/token/", data={"username": author.username, "password": "123456"}
         )
         
         self.accessToken = response.data["access"]
@@ -386,3 +390,53 @@ class RecipeAPIV2Test(test.APITestCase):
         )
 
         self.assertEqual(response.status_code, 201)
+
+    def test_recipe_api_list_update_recipe(self):
+
+        response = self.client.patch(
+            "/api/recipes/1/",
+            data={
+                "category": 1,
+                "author": 1,
+                "title": "Recipe Title Updated",
+                "description": "Recipe Description",
+                "slug": "recipe-title",
+                "preparation_time": 10,
+                "preparation_time_unit": "minutes",
+                "servings": 5,
+                "servings_unit": "portions",
+                "preparation_steps": "Recipe Preparation Steps",
+                "is_published": True,
+            },
+            HTTP_AUTHORIZATION=f'Bearer {self.accessToken}'
+        )
+
+        self.assertEqual(response.status_code, 200)
+
+    def test_recipe_api_list_dont_update_recipe_with_other_author(self):
+        user2 = User.objects.get(pk=2)
+        response = self.client.post(
+            "/recipes/api/token/", data={"username": "username1", "password": "123456"}
+        )
+
+        access_token = response.data["access"]
+
+        response = self.client.patch(
+            "/api/recipes/1/",
+            data={
+                "category": 1,
+                "author": 2,
+                "title": "Recipe Title Updated",
+                "description": "Recipe Description",
+                "slug": "recipe-title",
+                "preparation_time": 10,
+                "preparation_time_unit": "minutes",
+                "servings": 5,
+                "servings_unit": "portions",
+                "preparation_steps": "Recipe Preparation Steps",
+                "is_published": True,
+            },
+            HTTP_AUTHORIZATION=f'Bearer {access_token}'
+        )
+
+        self.assertEqual(response.status_code, 403)
