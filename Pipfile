@@ -15,6 +15,7 @@ parameterized = "*"
 django-debug-toolbar = "*"
 djangorestframework = "*"
 djangorestframework-simplejwt = "*"
+django-cors-headers = "*"
 
 [dev-packages]
 django-browser-reload = "*"
