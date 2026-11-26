@@ -1,1 +1,4 @@
-CORS_ALLOWED_ORIGINS = ["http://127.0.0.1:5500"]
+import os
+
+CORS_ALLOWED_ORIGINS =  os.environ.get("ALLOWED_HOSTS").split(",")
+
